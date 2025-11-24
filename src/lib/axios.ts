@@ -17,6 +17,7 @@ axiosInstance.interceptors.request.use(
 );
 
 let isRefreshing = false;
+
 let pendingQueue: {
   resolve: (value: unknown) => void;
   reject: (value: unknown) => void;
@@ -41,6 +42,7 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config as AxiosRequestConfig & {
       _retry: boolean;
     };
+
     if (
       error.response.status === 500 &&
       error.response.data.message === "jwt expired" &&

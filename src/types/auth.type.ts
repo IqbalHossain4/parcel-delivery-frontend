@@ -8,3 +8,12 @@ export interface ISignup {
   email: string;
   password: string;
 }
+
+export interface ISendOTP {
+  email: string;
+}
+
+export interface IVerifyOTP {
+  email: string;
+  otp: string;
+}

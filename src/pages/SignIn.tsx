@@ -1,4 +1,3 @@
-import React from "react";
 import { SignInForm } from "../components/modules/Authentication/SignInForm";
 
 const SignIn = () => {

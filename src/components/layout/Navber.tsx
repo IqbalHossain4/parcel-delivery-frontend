@@ -9,15 +9,33 @@ import {
 import { ModeToggle } from "../ui/ModeToggler";
 import Logo from "../../assets/icon/Logo";
 import { Link } from "react-router";
+import {
+  authApi,
+  useSignoutMutation,
+  useUserInfoQuery,
+} from "../../redux/features/auth/auth.api";
+import { useAppDispatch } from "../../redux/hook";
 
 const navigationLinks = [
-  { href: "#", label: "Home", active: true },
-  { href: "#", label: "Features" },
-  { href: "#", label: "Pricing" },
-  { href: "#", label: "About" },
+  { href: "/", label: "Home", role: "public" },
+  { href: "/about-us", label: "About Us", role: "public" },
+  { href: "/contact-us", label: "Contact Us", role: "public" },
+  { href: "/admin", label: "Dashboard", role: "admin" },
+  { href: "/sender", label: "Dashboard", role: "sender" },
+  { href: "/receiver", label: "Dashboard", role: "receiver" },
 ];
 
 export default function Navber() {
+  const [signout] = useSignoutMutation();
+  const { data } = useUserInfoQuery(undefined);
+  const dispatch = useAppDispatch();
+
+  console.log(data);
+  const handleSignout = async () => {
+    await signout(undefined);
+    dispatch(authApi.util.resetApiState());
+  };
+
   return (
     <header className="border-b px-4 md:px-6 container mx-auto">
       <div className="flex h-16 justify-between gap-4">
@@ -60,11 +78,7 @@ export default function Navber() {
                   <NavigationMenuList className="flex-col items-start gap-0 md:gap-2">
                     {navigationLinks.map((link, index) => (
                       <NavigationMenuItem key={index} className="w-full">
-                        <NavigationMenuLink
-                          href={link.href}
-                          className="py-1.5"
-                          active={link.active}
-                        >
+                        <NavigationMenuLink href={link.href} className="py-1.5">
                           {link.label}
                         </NavigationMenuLink>
                       </NavigationMenuItem>
@@ -83,15 +97,28 @@ export default function Navber() {
             <NavigationMenu className="h-full *:h-full max-md:hidden">
               <NavigationMenuList className="h-full gap-2">
                 {navigationLinks.map((link, index) => (
-                  <NavigationMenuItem key={index} className="h-full">
-                    <NavigationMenuLink
-                      active={link.active}
-                      href={link.href}
-                      className="h-full justify-center rounded-none border-y-2 border-transparent border-b-primary py-1.5 font-medium text-muted-foreground hover:border-b-primary hover:bg-transparent hover:text-primary data-[active]:border-b-primary data-[active]:bg-transparent!"
-                    >
-                      {link.label}
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
+                  <>
+                    {link?.role === "public" && (
+                      <NavigationMenuItem key={index}>
+                        <NavigationMenuLink
+                          asChild
+                          className="py-1.5 font-medium text-muted-foreground hover:text-primary"
+                        >
+                          <Link to={link.href}>{link.label}</Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                    )}
+                    {link?.role === data?.data?.role && (
+                      <NavigationMenuItem key={index}>
+                        <NavigationMenuLink
+                          asChild
+                          className="py-1.5 font-medium text-muted-foreground hover:text-primary"
+                        >
+                          <Link to={link.href}>{link.label}</Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                    )}
+                  </>
                 ))}
               </NavigationMenuList>
             </NavigationMenu>
@@ -99,9 +126,20 @@ export default function Navber() {
         </div>
         {/* Right side */}
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm" className="text-sm">
-            <Link to="/signin">Sign In</Link>
-          </Button>
+          {data?.data?.email ? (
+            <Button
+              variant="outline"
+              onClick={handleSignout}
+              size="sm"
+              className="text-sm"
+            >
+              SignOut
+            </Button>
+          ) : (
+            <Button asChild variant="ghost" size="sm" className="text-sm">
+              <Link to="/signin">Sign In</Link>
+            </Button>
+          )}
           <ModeToggle />
         </div>
       </div>
